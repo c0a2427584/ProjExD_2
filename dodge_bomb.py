@@ -3,6 +3,7 @@ import sys
 import pygame as pg
 import random
 import time
+from typing import List, Tuple
 
 WIDTH, HEIGHT = 1100, 650
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -20,9 +21,27 @@ def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
         tate = False
     return yoko, tate
 
+def init_bb_imgs() -> Tuple[List[pg.Surface], List[int]]:  #演習２:ゲームオーバー画面
+    """
+
+    爆弾が拡大と加速
+
+    """
+    bb_imgs = []
+    for r in range(1, 11):
+        bb_img = pg.Surface((20*r, 20*r))
+        pg.draw.circle(bb_img, (255, 0, 0), (10*r, 10*r), 10*r)
+        bb_img.set_colorkey((0, 0, 0))
+        bb_imgs.append(bb_img)
+    
+    bb_accs = [a for a in range(1, 11)]
+    return bb_imgs, bb_accs
+
 def gameover(screen: pg.Surface) -> None:    #演習１:ゲームオーバー画面
     """
+
     ゲーム終了画面
+    surface
     
     """
     # 1. 黒い矩形を描画する
@@ -49,7 +68,7 @@ def gameover(screen: pg.Surface) -> None:    #演習１:ゲームオーバー画
         screen.blit(cry_kk_img, cry_kk_rect)
     
     pg.display.update()
-    time.sleep(1)  # 6 显示5秒
+    time.sleep(5)  # 6 显示5秒
 
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
@@ -62,10 +81,13 @@ def main():
     bb_img = pg.Surface((20, 20))         #ex2
     pg.draw.circle(bb_img, (255, 0, 0), (10, 10), 10)
     bb_img.set_colorkey((0, 0, 0)) 
-    bb_rct = bb_img.get_rect()
+
+    bb_imgs, bb_accs = init_bb_imgs() #
+
+    bb_rct = bb_imgs[0].get_rect()
     bb_rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)
 
-    vx, vy = +20, +20     #
+    vx, vy = +5, +5     #
 
     clock = pg.time.Clock()
     tmr = 0
@@ -96,7 +118,12 @@ def main():
         if check_bound(kk_rct) != (True, True):
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])  # ex3
 
-        bb_rct.move_ip(vx, vy) #
+        stage = min(tmr // 500, 9) 
+        avx = vx * bb_accs[stage]  
+        avy = vy * bb_accs[stage]  
+        bb_img = bb_imgs[stage]
+
+        bb_rct.move_ip(avx, avy) #s
 
         yoko, tate = check_bound(bb_rct) #
         if not yoko:
