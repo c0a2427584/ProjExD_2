@@ -5,6 +5,7 @@ import random
 import time
 from typing import List, Tuple
 
+
 WIDTH, HEIGHT = 1100, 650
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -15,9 +16,9 @@ def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
     画面内ならTrue,画面外ならFalse
     """
     yoko, tate = True, True
-    if obj_rct.left < 0 or WIDTH < obj_rct.right:
+    if obj_rct.left < 0 or WIDTH < obj_rct.right:# 左端または右端が画面外に出たかチェック
         yoko = False
-    if obj_rct.top < 0 or HEIGHT < obj_rct.bottom:
+    if obj_rct.top < 0 or HEIGHT < obj_rct.bottom:# 上端または下端が画面外に出たかチェック
         tate = False
     return yoko, tate
 
@@ -34,7 +35,7 @@ def init_bb_imgs() -> Tuple[List[pg.Surface], List[int]]:  #演習２:ゲーム�
         bb_img.set_colorkey((0, 0, 0))
         bb_imgs.append(bb_img)
     
-    bb_accs = [a for a in range(1, 11)]
+    bb_accs = [a for a in range(1, 11)]# 1から10までの加速度リストを生成
     return bb_imgs, bb_accs
 
 def gameover(screen: pg.Surface) -> None:    #演習１:ゲームオーバー画面
@@ -54,7 +55,7 @@ def gameover(screen: pg.Surface) -> None:    #演習１:ゲームオーバー画
     text = font.render("Game Over", True, (255, 255, 255))
     text_rect = text.get_rect(center=(WIDTH//2, HEIGHT//2 - 50))
     
-    # 4. こうかとん
+    # 4. 泣いているこうかとんの画像を読み込み
     try:
         cry_kk_img = pg.transform.rotozoom(pg.image.load("fig/8.png"), 0, 1.5)
         cry_kk_rect = cry_kk_img.get_rect(center=(WIDTH//1.4, HEIGHT//2.5 + 15))
@@ -68,7 +69,7 @@ def gameover(screen: pg.Surface) -> None:    #演習１:ゲームオーバー画
         screen.blit(cry_kk_img, cry_kk_rect)
     
     pg.display.update()
-    time.sleep(5)  # 6 显示5秒
+    time.sleep(3)  # 6 3秒間表示
 
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
@@ -84,7 +85,7 @@ def main():
 
     bb_imgs, bb_accs = init_bb_imgs() #
 
-    bb_rct = bb_imgs[0].get_rect()
+    bb_rct = bb_imgs[0].get_rect()# 爆弾の矩形を取得
     bb_rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)
 
     vx, vy = +5, +5     #
@@ -92,11 +93,11 @@ def main():
     clock = pg.time.Clock()
     tmr = 0
     
-    DELTA = {                 # ex1
-        pg.K_UP: (0, -5),
-        pg.K_DOWN: (0, +5),
-        pg.K_LEFT: (-5, 0),
-        pg.K_RIGHT: (+5, 0)
+    DELTA = {                 # キーと移動量の対応辞書 ex1
+        pg.K_UP: (0, -10),
+        pg.K_DOWN: (0, +10),
+        pg.K_LEFT: (-10, 0),
+        pg.K_RIGHT: (+10, 0)
     }
 
     while True:
@@ -108,36 +109,36 @@ def main():
         key_lst = pg.key.get_pressed()
         sum_mv = [0, 0]
 
-        for key, delta in DELTA.items(): #
+        for key, delta in DELTA.items(): ## 各キーの移動量を合計に加算
             if key_lst[key]:
                 sum_mv[0] += delta[0]
                 sum_mv[1] += delta[1]
 
         kk_rct.move_ip(sum_mv)
 
-        if check_bound(kk_rct) != (True, True):
+        if check_bound(kk_rct) != (True, True):# 画面外に出たら移動をキャンセル
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])  # ex3
 
-        stage = min(tmr // 500, 9) 
-        avx = vx * bb_accs[stage]  
-        avy = vy * bb_accs[stage]  
-        bb_img = bb_imgs[stage]
+        stage = min(tmr // 500, 9) # 経過時間に応じたステージを計算
+        avx = vx * bb_accs[stage]  # ステージに応じた速度を計算
+        avy = vy * bb_accs[stage]  # ステージに応じた速度を計算
+        bb_img = bb_imgs[stage]# ステージに応じた爆弾画像を選択
 
-        bb_rct.move_ip(avx, avy) #s
+        bb_rct.move_ip(avx, avy) #爆弾を移動
 
-        yoko, tate = check_bound(bb_rct) #
+        yoko, tate = check_bound(bb_rct) #爆弾の画面端チェック
         if not yoko:
-            vx *= -1
+            vx *= -1 # 横方向の速度反転
         if not tate:
-            vy *= -1
+            vy *= -1 # 縦方向の速度反転
         
-        if kk_rct.colliderect(bb_rct):     #ex4
-            gameover(screen)
+        if kk_rct.colliderect(bb_rct):     #ex4# 衝突判定
+            gameover(screen)# ゲームオーバー画面を表示
             return  
 
         screen.blit(kk_img, kk_rct)
 
-        screen.blit(bb_img, bb_rct)  # 
+        screen.blit(bb_img, bb_rct)  #  爆弾を描画
         
         pg.display.update()
         tmr += 1
