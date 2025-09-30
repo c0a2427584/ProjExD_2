@@ -2,6 +2,7 @@ import os
 import sys
 import pygame as pg
 import random
+import time
 
 WIDTH, HEIGHT = 1100, 650
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -19,7 +20,36 @@ def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
         tate = False
     return yoko, tate
 
-
+def gameover(screen: pg.Surface) -> None:    #演習１:ゲームオーバー画面
+    """
+    ゲーム終了画面
+    
+    """
+    # 1. 黒い矩形を描画する
+    overlay = pg.Surface((WIDTH, HEIGHT))
+    overlay.fill((0, 0, 0))
+    overlay.set_alpha(180)  #2 透明度を設定する
+    
+    # 3. 白文字でGame Overと書かれたフォントSurface
+    font = pg.font.Font(None, 100)
+    text = font.render("Game Over", True, (255, 255, 255))
+    text_rect = text.get_rect(center=(WIDTH//2, HEIGHT//2 - 50))
+    
+    # 4. こうかとん
+    try:
+        cry_kk_img = pg.transform.rotozoom(pg.image.load("fig/8.png"), 0, 1.5)
+        cry_kk_rect = cry_kk_img.get_rect(center=(WIDTH//1.4, HEIGHT//2.5 + 15))
+    except:
+        cry_kk_img = None
+    
+    # 5. 1のSurfaceをscreen Surfaceにblitする
+    screen.blit(overlay, (0, 0))
+    screen.blit(text, text_rect)
+    if cry_kk_img:
+        screen.blit(cry_kk_img, cry_kk_rect)
+    
+    pg.display.update()
+    time.sleep(1)  # 6 显示5秒
 
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
@@ -35,7 +65,7 @@ def main():
     bb_rct = bb_img.get_rect()
     bb_rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)
 
-    vx, vy = +5, +5     #
+    vx, vy = +20, +20     #
 
     clock = pg.time.Clock()
     tmr = 0
@@ -75,6 +105,7 @@ def main():
             vy *= -1
         
         if kk_rct.colliderect(bb_rct):     #ex4
+            gameover(screen)
             return  
 
         screen.blit(kk_img, kk_rct)
