@@ -7,6 +7,11 @@ WIDTH, HEIGHT = 1100, 650
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
+    """
+    引数：こうかとんRectかばくだんRect
+    戻り値：タプル（横方向判定結果，縦方向判定結果）
+    画面内ならTrue,画面外ならFalse
+    """
     yoko, tate = True, True
     if obj_rct.left < 0 or WIDTH < obj_rct.right:
         yoko = False
@@ -59,7 +64,7 @@ def main():
         kk_rct.move_ip(sum_mv)
 
         if check_bound(kk_rct) != (True, True):
-            kk_rct.move_ip(-sum_mv[0], -sum_mv[1])  # ex4
+            kk_rct.move_ip(-sum_mv[0], -sum_mv[1])  # ex3
 
         bb_rct.move_ip(vx, vy) #
 
